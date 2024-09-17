@@ -2,7 +2,10 @@
   "name": "tar",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "e2e": "npx playwright test && npm playwright show-report",
+    "e2e-headful": "npx playwright test --headed && npm playwright show-report"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
