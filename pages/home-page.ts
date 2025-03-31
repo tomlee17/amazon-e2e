@@ -3,8 +3,7 @@ import { Header } from "./components/header";
 
 export class MainPage {
     readonly header: Header;
-
-    readonly url: string = "https://www.amazon.sg/";
+    readonly target_url: string = "https://www.amazon.sg/";
 
     constructor(
         private readonly page: Page,
@@ -13,7 +12,7 @@ export class MainPage {
     }
 
     async goToUrl() {
-        await this.page.goto(this.url);
+        await this.page.goto(this.target_url);
     }
 
     async search(item: string) {
