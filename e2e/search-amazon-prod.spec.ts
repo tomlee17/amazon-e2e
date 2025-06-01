@@ -1,14 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { MainPage } from '../pages/home-page';
-import { SearchResultsPage } from '../pages/search-results-page';
-import { serialize } from 'v8';
+import { FirstAvailableProductStrategy, SearchResultsPage } from '../pages/search-results-page';
 import { ProductPage } from '../pages/product-page';
-import { postAddCartPage } from '../pages/post-add-cart-page';
-import exp from 'constants';
+import { PostAddCartPage } from '../pages/post-add-cart-page';
 
 test('Search, filter, add product to cart, then remove from cart', async ({ page }) => {
   const PRODUCT = 'toilet paper';
-  const BRAND = 'Scottie';
+  const BRAND = 'Vinda';
   const QTY = 2;
 
   // Navigate to main page
@@ -21,23 +19,25 @@ test('Search, filter, add product to cart, then remove from cart', async ({ page
   const search_results_page = new SearchResultsPage(page);
   await search_results_page.filterByBrand(BRAND);
 
-  const filtered_products_counts = await search_results_page.filtered_products_links.count();
+  await expect(search_results_page.current_search_results.first()).toBeVisible();
+
+  const filtered_products_counts = await search_results_page.current_search_results.count();
   const assertions: Promise<void>[] = [];
   for (let i = 0; i < filtered_products_counts; ++i) {
     assertions.push(
-      expect(search_results_page.filtered_products_links.nth(i)).toHaveText(BRAND)
+      expect(search_results_page.current_search_results.nth(i)).toContainText(BRAND, { ignoreCase: true})
     );
   }
   await Promise.all(assertions);
 
   // Click on a product
-  await search_results_page.selectFirstProductOf(BRAND);
+  await search_results_page.selectProductOf(BRAND, new FirstAvailableProductStrategy());
   const product_page = new ProductPage(page);
   await expect(product_page.product_title).toContainText(BRAND);
 
   // Add a number of the product to cart
   await product_page.addToCart(QTY);
-  const post_add_cart_page = new postAddCartPage(page);
+  const post_add_cart_page = new PostAddCartPage(page);
   await Promise.all([
     expect(post_add_cart_page.added_to_cart_heading).toBeVisible(),
     expect(post_add_cart_page.header.cart_count).toHaveText(`${QTY}`)

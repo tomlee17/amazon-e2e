@@ -1,14 +1,16 @@
-import { Locator, Page } from "@playwright/test";
+import { expect, Locator, Page } from "@playwright/test";
 
 export class SearchResultsPage {
     readonly brand_filter_list: Locator;
-    readonly filtered_products_links: Locator;
 
     constructor(
         private readonly page: Page,
     ) {
-        this.brand_filter_list = page.locator('div[id="brandsRefinements"]');
-        this.filtered_products_links = page.locator('div:has-text("Add to cart")');
+        this.brand_filter_list = page.locator('div[id="brandsRefinements"]');;
+    }
+
+    get current_search_results(): Locator {
+        return this.page.locator("div[role='listitem']");
     }
 
     async filterByBrand(brand: string) {
@@ -22,8 +24,31 @@ export class SearchResultsPage {
         await brand_checkbox.click();
     }
 
-    async selectFirstProductOf(brand: string) {
-        const nth_product_link = this.filtered_products_links.locator(`div.sg-col-inner a span:has-text("${brand}")`).first();
-        await nth_product_link.click();
+    async selectProductOf(brand: string, strategy: ProductSelectionStrategy) {
+        const target_product_link = strategy.selectFrom(this.current_search_results, brand);
+        await expect(target_product_link).toBeVisible();
+        await target_product_link.click();
+    }
+}
+
+interface ProductSelectionStrategy {
+    selectFrom(product: Locator, brand: string): Locator;
+}
+
+export class FirstAvailableProductStrategy implements ProductSelectionStrategy {
+    selectFrom(products: Locator, brand: string): Locator {
+        return products
+                .locator(':scope:has(button:has-text("Add to cart"))')
+                .getByRole("link", { name: brand })
+                .first();
+    }
+}
+
+export class FirstUnavailableProductStrategy implements ProductSelectionStrategy {
+    selectFrom(products: Locator, brand: string): Locator {
+        return products
+                .locator(':scope:not(:has(button:has-text("Add to cart")))')
+                .getByRole("link", { name: brand })
+                .first();
     }
 }
