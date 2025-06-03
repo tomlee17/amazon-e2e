@@ -5,7 +5,8 @@
   "scripts": {
     "e2e": "npx playwright test && npx playwright show-report",
     "e2e-headful": "npx playwright test --headed && npx playwright show-report",
-    "postinstall": "npx playwright install"
+    "build": "docker build -t amazon-e2e .",
+    "postinstall": "npx playwright install --with-deps"
   },
   "keywords": [],
   "author": "",

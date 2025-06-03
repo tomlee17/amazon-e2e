@@ -1,0 +1,14 @@
+**/.dockerignore
+**/.env
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/Dockerfile
+**/node_modules
+**/*.md
+**/test-results
+**/playwright-report
+**/blob-report
+**/playwright/.cache
+**/docker-playwright-report
